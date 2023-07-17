@@ -91,7 +91,6 @@ class C4Audits:
                 result = self.processQAGas(repo, name, issue, issueNum)
             else:
                 result = self.processHighMid(repo, name, issueNum, issue)
-                print(result[1])
                 if result[1] == "[HIGH]":
                     highs += 1
                 if result[1] == "[MEDIUM]":

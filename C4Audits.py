@@ -6,7 +6,7 @@ from C4FindingsScraper import C4FindingsScraper
 
 class C4Audits:
     def __init__(self):
-        self.base_dir = "Code4rena"
+        self.base_dir = "audits"
         self.org = "code-423n4"
         self.user = ""
         self.api_url_template = (

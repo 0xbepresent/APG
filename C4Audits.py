@@ -127,10 +127,7 @@ class C4Audits:
             )
             highs += result[2]
             meds += result[3]
-        str = (
-            str
-            + f"\n{highs} Highs and {meds} Medium severity.\n\nI'm available for web3 security consulting and private audits."
-        )
+        str = str + f"\n{highs} Highs and {meds} Medium severity."
         with open(os.path.join(self.main_dir, "README.md"), "w") as f:
             f.write(str)
 

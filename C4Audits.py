@@ -6,7 +6,8 @@ from C4FindingsScraper import C4FindingsScraper
 
 class C4Audits:
     def __init__(self):
-        self.base_dir = "audits"
+        self.main_dir = "audits"
+        self.base_dir = f"{self.main_dir}/c4"
         self.org = "code-423n4"
         self.user = ""
         self.api_url_template = (
@@ -121,7 +122,7 @@ class C4Audits:
             str = (
                 str
                 + "- "
-                + f"[{split_name[2].capitalize()}]({result[0]}/README.md) - {split_name[0]}-{split_name[1]}."
+                + f"[{split_name[2].capitalize()}](c4/{result[0]}/README.md) - {split_name[0]}-{split_name[1]}."
                 + "\n"
             )
             highs += result[2]
@@ -130,7 +131,7 @@ class C4Audits:
             str
             + f"\n{highs} Highs and {meds} Medium severity.\n\nI'm available for web3 security consulting and private audits."
         )
-        with open(os.path.join(self.base_dir, "README.md"), "w") as f:
+        with open(os.path.join(self.main_dir, "README.md"), "w") as f:
             f.write(str)
 
     def createC4(self, user):

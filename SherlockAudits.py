@@ -36,26 +36,20 @@ class SherlockAudits:
         ) as contestFile:
             for report in reports:
                 original_title = report["title"]
-                title = (
-                    original_title.replace(" ", "_")
-                    .replace("/", "-")
-                    .replace("`", "")
-                    .replace("'", "")
-                )
                 severity = report["severity"]
-                folder_name = severity + "-" + title
+                issue_link = report["html_url"]
+                folder_name = severity + "-" + str(report["id"])
                 path = os.path.join(self.base_dir, contest_name, folder_name)
                 self.createDirIfNotExists(path)
                 #
                 # Write the folder issue readme
-                issue_link = report["html_url"]
                 additional = f"# Original link\n{issue_link}\n"
                 rel_link = os.path.join(folder_name, "README.md")
                 with open(os.path.join(path, "README.md"), "w") as newFile:
                     newFile.write(additional + report["body"])
                 #
                 # Write the contest readme
-                contest_str = f"\n[{severity}]({rel_link}) - {original_title}\n"
+                contest_str = f"\n- [{severity}]({rel_link}) - {original_title}\n"
                 contestFile.write(contest_str)
 
     def createSherlockReadme(self, all_findings):
@@ -74,7 +68,7 @@ class SherlockAudits:
             str = (
                 str
                 + "- "
-                + f"[{contest_name}](sherlock/{contest_path}/README.md) - {contest_date[0]}-{contest_date[1]}."
+                + f"[{contest_name}]({contest_path}/README.md) - {contest_date[0]}-{contest_date[1]}."
                 + "\n"
             )
             highs += all_findings[finding]["highs"]

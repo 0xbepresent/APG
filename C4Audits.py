@@ -47,10 +47,10 @@ class C4Audits:
         file_name = "README.md"
         path = os.path.join(self.base_dir, name, folder_name)
         self.createDirIfNotExists(path)
-        additional = f"# Original link\n{issue}\n"
+        additional = f"# Original link\n{issue}\n\n"
         with open(os.path.join(path, file_name), "w") as newFile:
             newFile.write(additional + md)
-        return f"[[{folder_name}]]({os.path.join(folder_name, file_name)})"
+        return (f"[[{folder_name}]]({os.path.join(folder_name, file_name)})", 0)
 
     def getSeverityFromLables(self, data):
         severity = ""
@@ -76,9 +76,8 @@ class C4Audits:
         elif f"{self.user}-G" in md:
             return self.processQAGas(repo, name, issue, f"{self.user}-G.md")
         original_title = data["title"]
-        title = original_title.replace(" ", "_").replace("/", "-").replace("`", "'")
         severity = self.getSeverityFromLables(data)
-        folder_name = severity + "-" + title
+        folder_name = severity + "-" + str(data["id"])
         path = os.path.join(self.base_dir, name, folder_name)
         self.createDirIfNotExists(path)
         additional = f"# Original link\n{issue}\n"
@@ -128,7 +127,7 @@ class C4Audits:
             str = (
                 str
                 + "- "
-                + f"[{split_name[2].capitalize()}](c4/{result[0]}/README.md) - {split_name[0]}-{split_name[1]}."
+                + f"[{split_name[2].capitalize()}]({result[0]}/README.md) - {split_name[0]}-{split_name[1]}."
                 + "\n"
             )
             highs += result[2]

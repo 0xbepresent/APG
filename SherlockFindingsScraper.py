@@ -32,6 +32,7 @@ class SherlockFindingsScraper:
                     break
             repositories[name]["reports"].append(
                 {
+                    "id": report["id"],
                     "title": report["title"],
                     "body": report["body"],
                     "updated_at": report["updated_at"],

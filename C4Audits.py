@@ -1,7 +1,12 @@
-import os
-import requests
 import json
+import os
+
+from dotenv import load_dotenv
+import requests
+
 from C4FindingsScraper import C4FindingsScraper
+
+load_dotenv()
 
 
 class C4Audits:
@@ -15,6 +20,7 @@ class C4Audits:
         )
         self.raw_url_template = "https://raw.githubusercontent.com/code-423n4/##REPO##/main/data/##USER##-##TYPE##.md"
         self.createDirIfNotExists(self.base_dir)
+        self.github_access_token = os.getenv('GITHUB_ACCESS_TOKEN')
 
     def createDirIfNotExists(self, path):
         if not os.path.exists(path):
@@ -63,7 +69,7 @@ class C4Audits:
             .replace("##REPO##", repo)
             .replace("##ISSUE##", issueNum)
         )
-        data = json.loads(requests.get(url).text)
+        data = json.loads(requests.get(url, headers={"Authorization": "Bearer {}".format(self.github_access_token)}).text)
         md = data["body"]
         if f"{self.user}-Q" in md:
             return self.processQAGas(repo, name, issue, f"{self.user}-Q.md")
@@ -114,7 +120,7 @@ class C4Audits:
             return (contest_name, len(results[0]), results[1], results[2])
 
     def createC4Readme(self, results):
-        str = f"# Security audits \n\n## Findings in Code4rena \n\n"
+        str = f"# Findings in Code4rena \n\n"
         highs = 0
         meds = 0
         for result in results:
@@ -128,12 +134,12 @@ class C4Audits:
             highs += result[2]
             meds += result[3]
         str = str + f"\n{highs} Highs and {meds} Medium severity."
-        with open(os.path.join(self.main_dir, "README.md"), "w") as f:
+        with open(os.path.join(self.base_dir, "README.md"), "w") as f:
             f.write(str)
 
     def createC4(self, user):
         self.user = user
-        crawler = C4FindingsScraper()
+        crawler = C4FindingsScraper(self.github_access_token)
         all_findings = crawler.getUserFindings(user)
         results = self.processContests(all_findings)
         self.createC4Readme(results)

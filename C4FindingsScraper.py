@@ -1,4 +1,5 @@
 import json
+
 import requests
 
 
@@ -7,9 +8,15 @@ class C4FindingsScraper:
         "https://api.github.com/repos/code-423n4/code423n4.com/contents/_data/reports"
     )
 
+    def __init__(self, github_access_token):
+        self.github_access_token = github_access_token
+
     def getAllReportsDownloadUrl(self):
         download_urls = set()
-        reports = json.loads(requests.get(self.website_reports_url).text)
+        reports = json.loads(
+            requests.get(
+                self.website_reports_url,
+                headers={"Authorization": "Bearer {}".format(self.github_access_token)}).text)
         for report_json in reports:
             try:
                 if "download_url" in report_json.keys():

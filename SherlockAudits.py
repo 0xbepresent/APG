@@ -62,7 +62,7 @@ class SherlockAudits:
         """
         Create the Sherlock info
         """
-        str = f"\n\n## Findings in Sherlock \n\n"
+        str = f"# Findings in Sherlock \n\n"
         highs = 0
         meds = 0
         for finding in sorted(all_findings):
@@ -83,7 +83,7 @@ class SherlockAudits:
             str
             + f"\n{highs} Highs and {meds} Medium severity.\n\nI'm available for web3 security consulting and private audits."
         )
-        with open(os.path.join(self.main_dir, "README.md"), "a") as f:
+        with open(os.path.join(self.base_dir, "README.md"), "w") as f:
             f.write(str)
 
     def createSh(self, user):

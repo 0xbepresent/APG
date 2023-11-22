@@ -75,7 +75,7 @@ class SherlockAudits:
             meds += all_findings[finding]["mediums"]
         str = (
             str
-            + f"\n{highs} Highs and {meds} Medium severity.\n\nI'm available for web3 security consulting and private audits."
+            + f"\n{highs} Highs and {meds} Medium severity."
         )
         with open(os.path.join(self.base_dir, "README.md"), "w") as f:
             f.write(str)

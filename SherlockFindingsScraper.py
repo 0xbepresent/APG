@@ -6,7 +6,7 @@ class SherlockFindingsScraper:
     def getUserFindings(self, user):
         url = f"https://api.github.com/search/issues?q=is:issue+label:Reward+{user}%20in:title%20org:sherlock-audit"
         reports = json.loads(requests.get(url).text)
-        print(f"[+] Searching findings by {user}")
+        print(f"[+] Searching findings by {user} on Sherlock")
         repositories = {}
         for report in reports["items"]:
             name = report["repository_url"].split("sherlock-audit/")[1]

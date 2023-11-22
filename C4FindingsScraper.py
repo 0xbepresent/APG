@@ -16,7 +16,7 @@ class C4FindingsScraper:
         reports = json.loads(
             requests.get(
                 self.website_reports_url,
-                headers={"Authorization": "Bearer {}".format(self.github_access_token)}).text)
+                headers={"Authorization": "Bearer {}".format(self.github_access_token)} if self.github_access_token else {}).text)
         for report_json in reports:
             try:
                 if "download_url" in report_json.keys():
@@ -33,7 +33,7 @@ class C4FindingsScraper:
         findings = []
         if not download_urls:
             return findings
-        print(f"[+] Searching findings by {user}")
+        print(f"[+] Searching findings by {user} on Code4rena")
         for download_url in download_urls:
             result, name = self.getUserFindingsForReport(user, download_url)
             if result:

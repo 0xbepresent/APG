@@ -69,8 +69,16 @@ class C4Audits:
             .replace("##REPO##", repo)
             .replace("##ISSUE##", issueNum)
         )
-        data = json.loads(requests.get(url, headers={"Authorization": "Bearer {}".format(self.github_access_token)}).text)
-        md = data["body"]
+        data = json.loads(
+            requests.get(
+                url,
+                headers={"Authorization": "Bearer {}".format(self.github_access_token)} if self.github_access_token else {}).text)
+        md = ""
+        try:
+            md = data["body"]
+        except KeyError:
+            print(f"Error while downloading reports, please see the Github rate limits...")
+            return("", "")
         if f"{self.user}-Q" in md:
             return self.processQAGas(repo, name, issue, f"{self.user}-Q.md")
         elif f"{self.user}-G" in md:

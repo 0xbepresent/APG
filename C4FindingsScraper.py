@@ -5,63 +5,39 @@ import requests
 
 class C4FindingsScraper:
     website_reports_url = (
-        "https://api.github.com/repos/code-423n4/code423n4.com/contents/_data/reports"
+        "https://code4rena.com/api/functions/get-profile-intensive?wardenHandle=0xbepresent"
     )
 
     def __init__(self, github_access_token):
         self.github_access_token = github_access_token
 
     def getAllReportsDownloadUrl(self):
-        download_urls = set()
         reports = json.loads(
-            requests.get(
-                self.website_reports_url,
-                headers={"Authorization": "Bearer {}".format(self.github_access_token)} if self.github_access_token else {}).text)
-        for report_json in reports:
-            try:
-                if "download_url" in report_json.keys():
-                    download_urls.add(report_json["download_url"])
-            except AttributeError:
-                print(
-                    f"Error while downloading reports, please see the Github rate limits..."
-                )
-                break
-        return download_urls
+            requests.post(
+                self.website_reports_url,).text)
+        return reports['auditHistory']
 
     def getUserFindings(self, user):
-        download_urls = self.getAllReportsDownloadUrl()
+        auditHistory = self.getAllReportsDownloadUrl()
         findings = []
-        if not download_urls:
+        if not auditHistory:
             return findings
         print(f"[+] Searching findings by {user} on Code4rena")
-        for download_url in download_urls:
-            result, name = self.getUserFindingsForReport(user, download_url)
+        for audit in auditHistory:
+            result = self.getUserFindingsForReport(user, audit)
             if result:
-                print(f"    [-] Found {len(result[name])} findings in {name}")
                 findings.append(result)
         return sorted(findings, key=lambda d: d["date"])
 
-    def getUserFindingsForReport(self, user, download_url):
+    def getUserFindingsForReport(self, user, audit):
         findings = None
         slug = "'"
-        contest_json = json.loads(requests.get(download_url).text)
         if (
-            "circa" in contest_json.keys()
-            and "title" in contest_json["circa"].keys()
-            and "html" in contest_json.keys()
+            "auditTitle" in audit.keys()
+            and "link" in audit.keys()
         ):
-            slug = contest_json["circa"]["slug"]
-            dateContest = contest_json["circa"]["date"]
-            issues = set()
-            plain_html = contest_json["html"]
-            mentions_of_user = plain_html.split(f"{user}</a>")
-            for mention in mentions_of_user:
-                if mention.endswith('">'):
-                    issueUrl = mention.split('<a href="')[-1][:-2]
-                    if "code-423n4" in issueUrl:
-                        issues.add(issueUrl)
-        if len(issues) > 0:
             findings = {}
-            findings[slug] = list(issues)
-            findings["date"] = dateContest
-        return findings, slug
+            findings["date"] = audit["date"]
+            findings["link"] = audit["link"]
+            findings["name"] = audit["link"].split("-findings")[0].split("code-423n4/")[1]
+        return findings

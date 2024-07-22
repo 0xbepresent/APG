@@ -69,6 +69,7 @@ class C4Audits:
             .replace("##REPO##", repo)
             .replace("##ISSUE##", issueNum)
         )
+        print(url)
         data = json.loads(
             requests.get(
                 url,
@@ -79,6 +80,7 @@ class C4Audits:
         except KeyError:
             print(f"Error while downloading reports, please see the Github rate limits...")
             return("", "")
+        if md is None: return ('', '')
         if f"{self.user}-Q" in md:
             return self.processQAGas(repo, name, issue, f"{self.user}-Q.md")
         elif f"{self.user}-G" in md:
@@ -96,57 +98,34 @@ class C4Audits:
 
     def processIssues(self, issues, name):
         results = []
-        repo = issues[0].split(self.org + "/")[1].split("/")[0]
+        repo = f"{name}-findings"
         highs = 0
         meds = 0
-        for issue in issues:
-            issueNum = issue.split("/")[-1]
-            if issueNum.endswith("md"):
-                result = self.processQAGas(repo, name, issue, issueNum)
-            else:
-                result = self.processHighMid(repo, name, issueNum, issue)
-                if result[1] == "[HIGH]":
-                    highs += 1
-                if result[1] == "[MEDIUM]":
-                    meds += 1
-            results.append(result[0])
+        issueNum = issues['link'].split("issues/")[-1]
+        if issueNum.endswith("md"):
+            result = self.processQAGas(repo, name, issues['link'], issueNum)
+        else:
+            result = self.processHighMid(repo, name, issueNum, issues['link'])
+            if result[1] == "[HIGH]":
+                highs += 1
+            if result[1] == "[MEDIUM]":
+                meds += 1
+        results.append(result[0])
         return [results, highs, meds]
 
-    def createContestREADME(self, results, name):
+    def createContestREADME(self, name):
         str = f"# Findings for {name} \n\n"
-        for result in results:
-            str = str + "- " + result + "\n"
         with open(os.path.join(self.base_dir, name, "README.md"), "w") as f:
             f.write(str)
 
     def processContest(self, contest_data):
-        for contest_name, issues in contest_data.items():
-            self.createDirIfNotExists(os.path.join(self.base_dir, contest_name))
-            results = self.processIssues(issues, contest_name)
-            self.createContestREADME(results[0], contest_name)
-            return (contest_name, len(results[0]), results[1], results[2])
-
-    def createC4Readme(self, results):
-        str = f"# Findings in Code4rena \n\n"
-        highs = 0
-        meds = 0
-        for result in results:
-            split_name = result[0].split("-")
-            str = (
-                str
-                + "- "
-                + f"[{split_name[2].capitalize()}]({result[0]}/README.md) - {split_name[0]}-{split_name[1]}."
-                + "\n"
-            )
-            highs += result[2]
-            meds += result[3]
-        str = str + f"\n{highs} Highs and {meds} Medium severity."
-        with open(os.path.join(self.base_dir, "README.md"), "w") as f:
-            f.write(str)
+        self.createDirIfNotExists(os.path.join(self.base_dir, contest_data['name']))
+        results = self.processIssues(contest_data, contest_data['name'])
+        self.createContestREADME(contest_data['name'])
+        return (contest_data['name'], len(results[0]), results[1], results[2])
 
     def createC4(self, user):
         self.user = user
         crawler = C4FindingsScraper(self.github_access_token)
         all_findings = crawler.getUserFindings(user)
         results = self.processContests(all_findings)
-        self.createC4Readme(results)
